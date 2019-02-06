@@ -1,0 +1,39 @@
+{
+  "timestamp": "2019-02-05T19:28:14.205Z",
+  "event": {
+    "count": 17644,
+    "involved_object": {
+      "api_version": "v1",
+      "resource_version": "290087",
+      "name": "fluentd-sumologic-2kktc",
+      "kind": "Pod",
+      "uid": "3abc153e-2676-11e9-8d1a-061130deda32"
+    },
+    "metadata": {
+      "timestamp": {
+        "created": "2019-02-02T23:08:13.000Z"
+      },
+      "name": "fluentd-sumologic-2kktc.157f601f9971b966",
+      "namespace": "default",
+      "self_link": "/api/v1/namespaces/default/events/fluentd-sumologic-2kktc.157f601f9971b966",
+      "generate_name": "",
+      "uid": "6a558f89-273f-11e9-944a-06f6178218d8",
+      "resource_version": "10612"
+    },
+    "timestamp": {
+      "first_occurrence": "2019-02-01T23:08:05.000Z",
+      "last_occurrence": "2019-02-05T19:28:14.000Z"
+    },
+    "message": "pulling image \"sumologic/fluentd-kubernetes-sumologic:latest\"",
+    "reason": "Pulling",
+    "type": "Normal"
+  },
+  "host": "ip-172-20-35-206",
+  "cloud": {
+    "machine_type": "t2.medium",
+    "region": "us-west-1",
+    "availability_zone": "us-west-1b",
+    "provider": "ec2",
+    "instance_id": "i-063b063f8a1ebbfcb"
+  }
+}

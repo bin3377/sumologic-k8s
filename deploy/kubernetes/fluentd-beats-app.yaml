@@ -1,0 +1,167 @@
+# Deploy singleton instance in the whole cluster for receiver data from beats, forward to sumologic
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-beats-config
+  namespace: sumologic
+data:
+  fluent.conf: |-
+    <source>
+      @type beats
+      port 5044
+      metadata_as_tag
+    </source>
+    <match *beat>
+      @type sumologic_metricbeat_retag
+    </match>
+    <filter metricset.kubernetes.event>
+      @type sumologic_k8s_event
+    </filter>
+    <match metricset.kubernetes.event>
+      @type sumologic
+      endpoint "#{ENV['SUMO_ENDPOINT_EVENT']}"
+      log_format json
+      add_timestamp false
+    </match>
+    <match metricset**>
+      @type sumologic_k8s_metric
+    </match>
+    <match carbon.v2**>
+      @type sumologic
+      endpoint "#{ENV['SUMO_ENDPOINT_METRIC']}"
+      data_type metrics
+      metric_data_format carbon2
+    </match>
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: fluentd-beats
+  namespace: sumologic
+  labels:
+    k8s-app: fluentd-beats
+spec:
+  selector:
+    matchLabels:
+      k8s-app: fluentd-beats
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: fluentd-beats
+    spec:
+      serviceAccountName: fluentd-beats
+      volumes:
+      - name: pos-files
+        hostPath:
+          path: /var/run/fluentd-pos
+          type: ""
+      - name: config-volume
+        configMap:
+          name: fluentd-beats-config
+      containers:
+      - name: fluentd-beats
+        image: byisumo/sumologic-fluentd-k8s
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: 2Gi
+            cpu: "200m"
+          requests:
+            memory: 2Gi
+            cpu: "200m"
+        ports:
+        - name: beats
+          containerPort: 5044
+          protocol: TCP
+        livenessProbe:
+          exec:
+            command:
+            - "/bin/sh"
+            - "-c"
+            - "[[ $( pgrep ruby | wc -l)  == 2 ]]"
+          initialDelaySeconds: 300
+          periodSeconds: 20
+        readinessProbe:
+          exec:
+            command:
+            - "/bin/sh"
+            - "-c"
+            - "[[ $( pgrep ruby | wc -l)  == 2 ]]"
+          initialDelaySeconds: 45
+          periodSeconds: 5
+        volumeMounts:
+        - name: config-volume
+          mountPath: /fluentd/etc/
+        - name: pos-files
+          mountPath: /mnt/pos/
+        env:
+        - name: SUMO_ENDPOINT_METRIC
+          valueFrom:
+            secretKeyRef:
+              name: sumologic
+              key: sumo-endpoint-metric
+        - name: SUMO_ENDPOINT_EVENT
+          valueFrom:
+            secretKeyRef:
+              name: sumologic
+              key: sumo-endpoint-event
+---
+# Service for listening beats traffic
+apiVersion: v1
+kind: Service
+metadata:
+  name: fluentd-beats
+  namespace: sumologic
+  labels:
+    k8s-app: fluentd-beats
+spec:
+  type: LoadBalancer
+  selector:
+    k8s-app: fluentd-beats
+  ports:
+  - name: beats
+    port: 5044
+    targetPort: 5044
+    protocol: TCP
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: fluentd-beats
+subjects:
+- kind: ServiceAccount
+  name: fluentd-beats
+  namespace: sumologic
+roleRef:
+  kind: ClusterRole
+  name: fluentd-beats
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: fluentd-beats
+  labels:
+    k8s-app: fluentd-beats
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - namespaces
+  - events
+  - pods
+  - replicasets
+  - statefulsets
+  - deployments
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fluentd-beats
+  namespace: sumologic
+  labels:
+    k8s-app: fluentd-beats
+---

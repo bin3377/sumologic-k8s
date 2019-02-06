@@ -1,0 +1,82 @@
+{
+  "@timestamp": "2019-02-05T19:32:44.757Z",
+  "@metadata": {
+    "beat": "metricbeat",
+    "type": "doc",
+    "version": "6.6.0"
+  },
+  "kubernetes": {
+    "namespace": "sumologic",
+    "node": {
+      "name": "ip-172-20-35-206.us-west-1.compute.internal"
+    },
+    "labels": {
+      "pod-template-hash": "2586062",
+      "k8s-app": "kube-state-metrics"
+    },
+    "pod": {
+      "name": "kube-state-metrics-69db4b6-2xgzp",
+      "cpu": {
+        "usage": {
+          "nanocores": 1135695,
+          "node": {
+            "pct": 0.0005678475
+          },
+          "limit": {
+            "pct": 0.0005678475
+          }
+        }
+      },
+      "memory": {
+        "usage": {
+          "bytes": 15613952,
+          "node": {
+            "pct": 0.003765775110518387
+          },
+          "limit": {
+            "pct": 0.003765775110518387
+          }
+        }
+      },
+      "network": {
+        "rx": {
+          "bytes": 33857066,
+          "errors": 0
+        },
+        "tx": {
+          "errors": 0,
+          "bytes": 2066831
+        }
+      },
+      "start_time": "2019-02-05T18:08:06Z",
+      "uid": "fc3459dc-2970-11e9-8d1a-061130deda32"
+    }
+  },
+  "beat": {
+    "name": "ip-172-20-35-206",
+    "hostname": "ip-172-20-35-206",
+    "version": "6.6.0"
+  },
+  "host": {
+    "name": "ip-172-20-35-206"
+  },
+  "meta": {
+    "cloud": {
+      "instance_id": "i-063b063f8a1ebbfcb",
+      "machine_type": "t2.medium",
+      "region": "us-west-1",
+      "availability_zone": "us-west-1b",
+      "provider": "ec2"
+    }
+  },
+  "metricset": {
+    "rtt": 7098,
+    "name": "pod",
+    "module": "kubernetes",
+    "host": "localhost:10255"
+  },
+  "event": {
+    "dataset": "kubernetes.pod",
+    "duration": 7098495
+  }
+}
